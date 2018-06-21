@@ -1,0 +1,79 @@
+# Copyright 2001 David Abrahams.
+# Copyright 2004, 2005 Markus Schoepflin.
+# Copyright 2011, John Maddock
+# Copyright 2013, Cray, Inc.
+# Copyright 2018, NEC Corporation
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
+
+#
+# NEC C++ Compiler
+#
+
+import feature generators common ;
+import toolset : flags ;
+
+feature.extend toolset : ncc ;
+
+# Inherit from Unix toolset to get library ordering magic.
+toolset.inherit  ncc : unix ;
+
+generators.override ncc.prebuilt : builtin.lib-generator ;
+generators.override ncc.prebuilt : builtin.prebuilt ;
+generators.override ncc.searched-lib-generator : searched-lib-generator ;
+
+rule init ( version ? : command * : options * )
+{
+}
+
+generators.register-c-compiler ncc.compile.c++ : CPP : OBJ : <toolset>ncc ;
+generators.register-c-compiler ncc.compile.c : C : OBJ : <toolset>ncc ;
+
+
+flags ncc.compile OPTIONS <debug-symbols>on : -g ;
+
+flags ncc.compile OPTIONS <optimization>off : -O0 ;
+flags ncc.compile OPTIONS <optimization>speed : -O3 ;
+flags ncc.compile OPTIONS <optimization>space : -O ;
+
+flags ncc.compile OPTIONS <cflags> ;
+flags ncc.compile.c++ OPTIONS <cxxflags> ;
+flags ncc.compile DEFINES <define> ;
+flags ncc.compile INCLUDES <include> ;
+flags ncc.link OPTIONS <linkflags> ;
+
+flags ncc.compile OPTIONS : ;
+flags ncc.compile OPTIONS <link>shared : -fPIC ;
+flags ncc.compile OPTIONS <link>static :  ;
+flags ncc.link OPTIONS <link>static : -static ;
+flags ncc.link OPTIONS <link>shared ;
+flags ncc.link LOPTIONS <link>shared : -shared ;
+
+flags ncc.link LIBPATH <library-path> ;
+flags ncc.link LIBRARIES <library-file> ;
+flags ncc.link FINDLIBS-ST <find-static-library> ;
+flags ncc.link FINDLIBS-SA <find-shared-library> ;
+
+actions link.dll bind LIBRARIES
+{
+    nc++ -o "$(<[1])" -Wl,-h -Wl,$(<[-1]:D=) -shared -L$(LIBPATH)  "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-ST) -l$(FINDLIBS-SA) $(OPTIONS)
+}
+
+
+actions compile.c
+{
+    ncc -c $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -o "$(<)" "$(>)"
+}
+
+actions compile.c++
+{
+    nc++ -c $(OPTIONS) -D$(DEFINES) -I"$(INCLUDES)" -o "$(<)" "$(>)"
+}
+
+# Always create archive from scratch. See the gcc toolet for rationale.
+RM = [ common.rm-command ] ;
+actions together piecemeal archive
+{
+  $(RM) "$(<)"
+  nar rc $(<) $(>)
+}
