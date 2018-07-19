@@ -1,4 +1,5 @@
 #!/bin/sh
+set -eu
 
 INSTALLPATH=/opt/nec/nosupport/frovedis/ve/opt/boost
 
