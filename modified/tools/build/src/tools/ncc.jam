@@ -33,8 +33,7 @@ generators.register-c-compiler ncc.compile.c : C : OBJ : <toolset>ncc ;
 flags ncc.compile OPTIONS <debug-symbols>on : -g ;
 
 flags ncc.compile OPTIONS <optimization>off : -O0 ;
-# -fcheck-noexcept-violation is for dealing with the glitch of nc++ 5.1.0
-flags ncc.compile OPTIONS <optimization>speed : -O3 -fcheck-noexcept-violation ;
+flags ncc.compile OPTIONS <optimization>speed : -O3 ;
 flags ncc.compile OPTIONS <optimization>space : -O ;
 
 flags ncc.compile OPTIONS <cflags> ;
