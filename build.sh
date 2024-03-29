@@ -8,6 +8,7 @@ if [ ! -f boost_1_67_0.tar.gz ]; then
 fi
 tar -zxf boost_1_67_0.tar.gz
 cp -r modified/* boost_1_67_0/
+./deal_with_glitch.sh
 cd boost_1_67_0
 ./bootstrap.sh
 ./b2 --prefix=${INSTALLPATH} toolset=ncc --with-program_options --with-serialization --with-system link=static
